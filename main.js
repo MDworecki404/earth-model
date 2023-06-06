@@ -1,7 +1,9 @@
 import "./style.css";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import landJPG from "./assets/land.jpg";
+import { BloomPass } from "three/examples/jsm/postprocessing/BloomPass";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -26,6 +28,18 @@ const sunMaterial = new THREE.MeshPhongMaterial({
 const sun = new THREE.Mesh(sunGeometry, sunMaterial);
 sun.position.set(500, 0, 0);
 scene.add(sun);
+const sunBlurGeometry = new THREE.SphereGeometry(25, 32, 16);
+const sunBlurMaterial = new THREE.MeshStandardMaterial({
+  color: 0xaaff00,
+  emissive: 0xaaff00,
+  shininess: 0xaaff00,
+  transparent: true,
+  opacity: 0.2,
+});
+const sunBlur = new THREE.Mesh(sunBlurGeometry, sunBlurMaterial);
+sunBlur.position.set(500, 0, 0);
+scene.add(sunBlur);
+
 const sunPivot = new THREE.Mesh(pivotGeometry, pivotMaterial);
 sunPivot.position.set(500, 0, 0);
 scene.add(sunPivot);
@@ -137,7 +151,99 @@ const earthOrbitMaterial = new THREE.MeshPhongMaterial({
 const earthOrbit = new THREE.Mesh(earthOrbitGeometry, earthOrbitMaterial);
 earthOrbit.rotation.x = (90 * Math.PI) / 180;
 earthOrbit.position.x = 0;
-sunPivot.add(earthOrbit);
+//sunPivot.add(earthOrbit);
+
+//ROCKET
+const RocketGeometry = new THREE.CapsuleGeometry(0.25, 1, 4, 8);
+const RocketMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+const rocket = new THREE.Mesh(RocketGeometry, RocketMaterial);
+const RocketHeadGeometry = new THREE.TetrahedronGeometry(0.25, 0);
+const RocketHeadMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+const rocketHead = new THREE.Mesh(RocketHeadGeometry, RocketHeadMaterial);
+rocketHead.position.set(0.01, -0.636, 0.001);
+rocketHead.rotation.set(
+  (-45 * Math.PI) / 180,
+  (-45 * Math.PI) / 180,
+  (100 * Math.PI) / 180
+);
+rocket.add(rocketHead);
+const points = [
+  new THREE.Vector2(0, -0.5),
+  new THREE.Vector2(0.5, 0.5),
+  new THREE.Vector2(0, 0.5),
+];
+const RocketBottomGeometry = new THREE.LatheGeometry(points, 36, 0, 360);
+const RocketBottomMaterial = new THREE.MeshStandardMaterial({
+  color: 0xffffff,
+});
+const rocketBottom = new THREE.Mesh(RocketBottomGeometry, RocketBottomMaterial);
+rocketBottom.position.set(0, 0.5, 0);
+rocket.add(rocketBottom);
+const RocketFireGeometry = new THREE.IcosahedronGeometry(0.25, 0);
+const RocketFireMaterial = new THREE.MeshStandardMaterial({
+  color: 0xfd9900,
+  emissive: 0xfd9900,
+});
+const rocketFire = new THREE.Mesh(RocketFireGeometry, RocketFireMaterial);
+rocketFire.position.set(0, 0.601, -0.036);
+rocketBottom.add(rocketFire);
+rocket.position.set(6.325, 3.045, 2.016);
+rocket.rotation.set(
+  (35.4 * Math.PI) / 180,
+  (3.8 * Math.PI) / 180,
+  (126.6 * Math.PI) / 180
+);
+scene.add(rocket);
+
+const MoonGeometry = new THREE.SphereGeometry(1.74, 32, 16);
+const MoonMaterial = new THREE.MeshStandardMaterial({
+  color: 0xc4c4c4,
+  metalness: 0.92,
+});
+const Moon = new THREE.Mesh(MoonGeometry, MoonMaterial);
+
+const MoonPartGeometry = new THREE.IcosahedronGeometry(0.5, 1);
+const MoonPartMaterial = new THREE.MeshStandardMaterial({
+  color: 0xa1a1a1,
+  metalness: 0.92,
+});
+let MoonParts = [
+  new THREE.Mesh(MoonPartGeometry, MoonPartMaterial),
+  new THREE.Mesh(MoonPartGeometry, MoonPartMaterial),
+  new THREE.Mesh(MoonPartGeometry, MoonPartMaterial),
+  new THREE.Mesh(MoonPartGeometry, MoonPartMaterial),
+  new THREE.Mesh(MoonPartGeometry, MoonPartMaterial),
+  new THREE.Mesh(MoonPartGeometry, MoonPartMaterial),
+  new THREE.Mesh(MoonPartGeometry, MoonPartMaterial),
+  new THREE.Mesh(MoonPartGeometry, MoonPartMaterial),
+  new THREE.Mesh(MoonPartGeometry, MoonPartMaterial),
+  new THREE.Mesh(MoonPartGeometry, MoonPartMaterial),
+  new THREE.Mesh(MoonPartGeometry, MoonPartMaterial),
+  new THREE.Mesh(MoonPartGeometry, MoonPartMaterial),
+];
+MoonParts[0].position.set(0.105, 0.638, 1.175);
+MoonParts[1].position.set(1.272, 0.554, -0.07);
+MoonParts[2].position.set(-0.625, -0.005, 1.24);
+MoonParts[3].position.set(-1.121, -0.553, 0.482);
+MoonParts[4].position.set(-1.253, 0.343, -0.315);
+MoonParts[5].position.set(0.489, 1.053, -0.745);
+MoonParts[6].position.set(-0.3, 1.263, 0.331);
+MoonParts[7].position.set(0.469, -0.62, -1.125);
+MoonParts[8].position.set(-0.862, -0.957, -0.516);
+MoonParts[9].position.set(-0.536, 0.19, -1.233);
+MoonParts[10].position.set(0.568, -0.915, 0.811);
+MoonParts[11].position.set(0.814, -1.022, -0.307);
+
+for (let i = 0; i < MoonParts.length; i++) {
+  Moon.add(MoonParts[i]);
+}
+
+const moonPivot = new THREE.Mesh(pivotGeometry, pivotMaterial);
+moonPivot.rotation.set((45 * Math.PI) / 180, 0, 0);
+scene.add(moonPivot);
+
+Moon.position.set(25, 10, 0);
+moonPivot.add(Moon);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -157,7 +263,22 @@ function animate() {
   satelitePivot.rotation.y += 0.005;
   satelitePivot.rotation.x -= 0.001;
   sunPivot.rotation.y += 0.0;
-
+  moonPivot.rotation.z -= (0.01 * Math.PI) / 180;
+  moonPivot.rotation.x += (0.01 * Math.PI) / 180;
+  moonPivot.rotation.y += 0.01;
+  if (rocket.rotation.x > 0) {
+    rocket.rotation.x -= 0.01;
+  }
+  if (rocket.rotation.y > 0) {
+    rocket.rotation.y -= 0.01;
+  }
+  if (rocket.rotation.z > (90 * Math.PI) / 180) {
+    rocket.rotation.z -= (0.1 * Math.PI) / 180;
+    rocket.position.x += 0.01;
+    rocket.position.y += 0.001;
+  } else {
+    rocket.position.x += 0.01;
+  }
   renderer.render(scene, camera);
 }
 
