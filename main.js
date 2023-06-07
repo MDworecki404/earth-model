@@ -25,7 +25,7 @@ const sunMaterial = new THREE.MeshPhongMaterial({
 });
 const sun = new THREE.Mesh(sunGeometry, sunMaterial);
 sun.position.set(500, 0, 0);
-scene.add(sun);
+//scene.add(sun);
 const sunBlurGeometry = new THREE.SphereGeometry(25, 32, 16);
 const sunBlurMaterial = new THREE.MeshStandardMaterial({
   color: 0xaaff00,
@@ -36,14 +36,37 @@ const sunBlurMaterial = new THREE.MeshStandardMaterial({
 });
 const sunBlur = new THREE.Mesh(sunBlurGeometry, sunBlurMaterial);
 sunBlur.position.set(500, 0, 0);
-scene.add(sunBlur);
+//scene.add(sunBlur);
+
+const sunloader = new GLTFLoader();
+sunloader.load(
+  "./assets/sun/scene.gltf",
+  (gltf) => {
+    scene.add(gltf.scene);
+    gltf.animations; // Array<THREE.AnimationClip>
+    gltf.scene; // THREE.Group
+    gltf.scenes; // Array<THREE.Group>
+    gltf.cameras; // Array<THREE.Camera>
+    gltf.asset; // Object
+    gltf.scene.scale.setScalar(1);
+    gltf.scene.position.set(500, 0, 0);
+    gltf.scene.rotation.set((0 * Math.PI) / 180, 1, (-90 * Math.PI) / 180);
+    gltf.scene.castShadow = true;
+    gltf.scene.receiveShadow = true;
+    const sunLight = new THREE.PointLight(0xffffff, 1);
+    gltf.scene.add(sunLight);
+  },
+  (xhr) => {
+    console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+  },
+  (error) => {
+    console.log("Ann error happened");
+  }
+);
 
 const sunPivot = new THREE.Mesh(pivotGeometry, pivotMaterial);
 sunPivot.position.set(500, 0, 0);
 scene.add(sunPivot);
-
-const sunLight = new THREE.PointLight(0xffffff, 1);
-sun.add(sunLight);
 
 const alwaysLight = new THREE.AmbientLight(0xffffff, 0.05);
 alwaysLight.position.set(0, 0, 0);
