@@ -1,9 +1,7 @@
 import "./style.css";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { BloomPass } from "three/examples/jsm/postprocessing/BloomPass";
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -193,7 +191,7 @@ rocket.rotation.set(
   (3.8 * Math.PI) / 180,
   (126.6 * Math.PI) / 180
 );
-scene.add(rocket);
+//scene.add(rocket);
 
 const MoonGeometry = new THREE.SphereGeometry(1.74, 32, 16);
 const MoonMaterial = new THREE.MeshStandardMaterial({
@@ -245,6 +243,111 @@ scene.add(moonPivot);
 Moon.position.set(25, 10, 0);
 moonPivot.add(Moon);
 
+const loader = new GLTFLoader();
+loader.load(
+  "./assets/satelite/scene.gltf",
+  (gltf) => {
+    satelitePivot.add(gltf.scene);
+    gltf.animations; // Array<THREE.AnimationClip>
+    gltf.scene; // THREE.Group
+    gltf.scenes; // Array<THREE.Group>
+    gltf.cameras; // Array<THREE.Camera>
+    gltf.asset; // Object
+    gltf.scene.scale.setScalar(0.1);
+    gltf.scene.position.set(-5, 9, 9);
+    gltf.scene.rotation.set((0 * Math.PI) / 180, 1, (-90 * Math.PI) / 180);
+    gltf.scene.castShadow = true;
+    gltf.scene.receiveShadow = true;
+  },
+  (xhr) => {
+    console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+  },
+  (error) => {
+    console.log("Ann error happened");
+  }
+);
+loader.load(
+  "./assets/blackhole/scene.gltf",
+  (gltf) => {
+    scene.add(gltf.scene);
+    gltf.animations; // Array<THREE.AnimationClip>
+    gltf.scene; // THREE.Group
+    gltf.scenes; // Array<THREE.Group>
+    gltf.cameras; // Array<THREE.Camera>
+    gltf.asset; // Object
+    gltf.scene.scale.setScalar(500);
+    gltf.scene.position.set(0, 0, 2000);
+    gltf.scene.rotation.set((-25 * Math.PI) / 180, 0, (25 * Math.PI) / 180);
+    gltf.scene.castShadow = true;
+    gltf.scene.receiveShadow = true;
+    setInterval(() => {
+      gltf.scene.rotation.x += 0.0;
+      gltf.scene.rotation.y += 0.0005;
+      gltf.scene.rotation.z -= 0.0;
+    }, 1000 / 60);
+  },
+  (xhr) => {
+    console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+  },
+  (error) => {
+    console.log("Ann error happened");
+  }
+);
+
+const issPivot = new THREE.Mesh(pivotGeometry, pivotMaterial);
+scene.add(issPivot);
+
+loader.load(
+  "./assets/iss/scene.gltf",
+  (gltf) => {
+    issPivot.add(gltf.scene);
+    gltf.animations; // Array<THREE.AnimationClip>
+    gltf.scene; // THREE.Group
+    gltf.scenes; // Array<THREE.Group>
+    gltf.cameras; // Array<THREE.Camera>
+    gltf.asset; // Object
+    gltf.scene.scale.setScalar(0.2);
+    gltf.scene.position.set(7, 0, -10);
+    gltf.scene.rotation.set((-25 * Math.PI) / 180, 0, (25 * Math.PI) / 180);
+    gltf.scene.castShadow = true;
+    gltf.scene.receiveShadow = true;
+  },
+  (xhr) => {
+    console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+  },
+  (error) => {
+    console.log("Ann error happened");
+  }
+);
+
+const starsCount = 1000;
+const colors = [0xffffff, 0xf5a442, 0xa51be0, 0x0b69e3];
+const getRandomNumber = (min, max) => {
+  return Math.random() * (max - min) + min;
+};
+for (let i = 0; i < starsCount; i++) {
+  let random = Math.floor(Math.random() * 3);
+  console.log(random);
+
+  let color = colors[random];
+  console.log(color);
+  const geometry = new THREE.SphereGeometry(1, 32, 32);
+  const material = new THREE.MeshPhongMaterial({
+    color: color,
+    emissive: color,
+    shininess: 1,
+  });
+  const star = new THREE.Mesh(geometry, material);
+  star.receiveShadow = false;
+  star.castShadow = false;
+
+  star.position.x = 500 + getRandomNumber(-2000, 2000);
+  star.position.y = 500 + getRandomNumber(-2000, 2000);
+  star.position.z = 500 + getRandomNumber(-2000, 2000);
+
+  scene.add(star);
+}
+
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -266,6 +369,9 @@ function animate() {
   moonPivot.rotation.z -= (0.01 * Math.PI) / 180;
   moonPivot.rotation.x += (0.01 * Math.PI) / 180;
   moonPivot.rotation.y += 0.01;
+
+  issPivot.rotation.y += 0.005;
+  issPivot.rotation.x += 0.001;
   if (rocket.rotation.x > 0) {
     rocket.rotation.x -= 0.01;
   }
